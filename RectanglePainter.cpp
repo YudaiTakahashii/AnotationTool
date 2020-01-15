@@ -6,6 +6,9 @@ RectanglePainter::RectanglePainter(cv::Mat& targetImg, cv::Mat& originalIMG, std
 	ShapePainter(targetImg, originalIMG, imgsHistory, windowName, lineColor, transparencyColor, thickness) {
 }
 
+RectanglePainter:: ~RectanglePainter() {
+	std::cout << "~Rectangle" << std::endl;
+}
 void RectanglePainter::mouseCallBack(int event, int x, int y, int flags) {
 
 	
@@ -37,7 +40,7 @@ void RectanglePainter::mouseCallBack(int event, int x, int y, int flags) {
 			rectPoints.emplace_back(x, this->_clickPoint.y);
 			rectPoints.emplace_back(x, y);
 			rectPoints.emplace_back(this->_clickPoint.x, y);
-			cv::fillConvexPoly(this->_targetIMG, rectPoints, this->_transparencyColor, cv::LINE_AA);
+			cv::fillConvexPoly(this->_targetIMG, rectPoints, this->_transparencyColor);
 			cv::Mat ImgForShow = this->_originalIMG.clone();
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, ImgForShow);
 			cv::imshow(this->_windowName, ImgForShow);

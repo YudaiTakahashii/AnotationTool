@@ -11,7 +11,7 @@
 
 class IMGLabelPaster {
 public:
-	IMGLabelPaster(const std::string& imgPath);
+	IMGLabelPaster(const std::string& srcImgPath, const std::string& dstDir, const std::string &labelImgPath);
 	enum DrawSelection {
 		None, Rectangle, Circle, Polygon, Brush, Eraser, Region_Growing, 
 		Grab_Cut, MeanShift
@@ -31,6 +31,7 @@ private:
 	// Main target image.
 	cv::Mat _targetIMG;
 	cv::Mat _originalIMG;
+	cv::Mat _labelIMG;
 	//Main window name for display.
 	std::string _windowName;
 
@@ -41,7 +42,9 @@ private:
 	bool _readIMG();
 	// Configure GUI buttons
 	void _buildGUI();
-	std::string _imgPath;
+	std::string _srcImgPath;
+	std::string _dstImgPath;
+	std::string _labelImgPath;
 
 	// Callback methods.
 	static void _onRectangleButtonChanged(int state, void* userdata);

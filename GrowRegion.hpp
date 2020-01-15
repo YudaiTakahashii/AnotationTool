@@ -8,7 +8,6 @@ class GrowRegion : public ShapePainter {
 private:
 	const int _MAX_PARAMETER = 50;
 	int _parameter = 10;
-	std::string _parameterWindowName;
 
 	int _marker_size;
 	std::vector<bool> _marker;
@@ -20,7 +19,8 @@ private:
 	int _transparencyBlue, _transparencyGreen, _transparencyRed;
 public:
 	GrowRegion(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory, 
-		const std::string& windowName, const cv::Scalar& lineColor, int thickness,
+		const std::string& windowName,
+		const cv::Scalar& lineColor, int thickness,
 		cv::Scalar_<int>& transparencyColor);
 	~GrowRegion();
 	void GrowRegionInternal(unsigned char seed_val);

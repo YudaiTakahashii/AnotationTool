@@ -9,8 +9,9 @@ CirclePainter::CirclePainter(cv::Mat& targetImg, cv::Mat& originalIMG, std::vect
 	int thickness, cv::Scalar_<int>& transparencyColor) :
 	ShapePainter(targetImg, originalIMG, imgsHistory, windowName, lineColor, transparencyColor, thickness) {
 	
-
-
+	// 前のトラックバーがあれば削除
+	if (cv::getWindowProperty(this->_trackbarName, WND_PROP_VISIBLE) != -1)
+		destroyWindow(this->_trackbarName);
 }
 
 void CirclePainter::mouseCallBack(int event, int x, int y, int flags) {
@@ -25,7 +26,7 @@ void CirclePainter::mouseCallBack(int event, int x, int y, int flags) {
 			double radius = sqrt(pow(x - circleCenter.x, 2) + pow(y - circleCenter.y, 2));
 			cv::Mat tempTargetIMG = this->_originalIMG.clone();
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, tempTargetIMG);
-			cv::circle(tempTargetIMG, circleCenter, static_cast<int>(radius), this->_lineColor, this->_thickness, cv::LINE_AA);
+			cv::circle(tempTargetIMG, circleCenter, static_cast<int>(radius), this->_lineColor, this->_thickness);
 			cv::imshow(this->_windowName, tempTargetIMG);
 		}
 
@@ -34,7 +35,10 @@ void CirclePainter::mouseCallBack(int event, int x, int y, int flags) {
 		this->_isLClicking = false;
 		cv::Point2d circleCenter = this->_clickPoint;
 		double radius = sqrt(pow(x - circleCenter.x, 2) + pow(y - circleCenter.y, 2));
-		cv::circle(this->_targetIMG, circleCenter, static_cast<int>(radius), this->_transparencyColor, cv::FILLED, cv::LINE_AA);
+		cv::circle(this->_targetIMG, circleCenter, static_cast<int>(radius), this->_transparencyColor, cv::FILLED
+		
+		
+		);
 
 		cv::Mat ImgForShow = this->_originalIMG.clone();
 		cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, ImgForShow);

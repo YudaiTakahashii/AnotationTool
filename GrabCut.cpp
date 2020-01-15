@@ -2,14 +2,18 @@
 
 GrabCut::GrabCut(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory,
 	const std::string& windowName, const cv::Scalar& lineColor,
-	int thickness, cv::Scalar_<int>& transparencyColor) : _parameterWindowName("parameter"),
+	int thickness, cv::Scalar_<int>& transparencyColor) :
 	ShapePainter(targetImg, originalIMG, imgsHistory, windowName, lineColor, transparencyColor, thickness) {
 
+	// 前のトラックバーがあれば削除
+	if (cv::getWindowProperty(this->_trackbarName, WND_PROP_VISIBLE) != -1)
+		destroyWindow(this->_trackbarName);
+
 	//トラックバーの生成
-	cv::namedWindow(this->_parameterWindowName);
-	cv::resizeWindow(this->_parameterWindowName, 100, 0);
-	cv::moveWindow(this->_parameterWindowName, 300, 300);
-	cv::createTrackbar("parameter", this->_parameterWindowName, &this->_parameter, this->_MAX_PARAMETER, nullptr);
+	cv::namedWindow(this->_trackbarName);
+	cv::resizeWindow(this->_trackbarName, 100, 0);
+	cv::moveWindow(this->_trackbarName, 300, 300);
+	cv::createTrackbar("parameter", this->_trackbarName, &this->_parameter, this->_MAX_PARAMETER, nullptr);
 }
 
 void GrabCut::mouseCallBack(int event, int x, int y, int flags) {
@@ -88,7 +92,6 @@ cv::Mat GrabCut::ExcuteGrabCut(cv::Rect2d rectangle)
 
 }
 GrabCut::~GrabCut() {
-	cv::destroyWindow(this->_parameterWindowName);
 	std::cout << "~GrabCut" << std::endl;
 
 }

@@ -1,6 +1,7 @@
 
 
 #include <string>
+#include <fstream>
 
 #include "IMGLabelPaster.hpp"
 #include "RectanglePainter.hpp"
@@ -17,14 +18,19 @@
 int IMGLabelPaster::tempBlue = 100;
 int IMGLabelPaster::tempGreen = 100;
 int IMGLabelPaster::tempRed = 100;
-IMGLabelPaster::IMGLabelPaster(const std::string& imgPath) : _drawSelection(IMGLabelPaster::None), _terminalSignal(false),
-_windowName("LebelPaster"), _shapePainterPointer(nullptr), _imgPath(imgPath), 
-_transColor(IMGLabelPaster::tempBlue, IMGLabelPaster::tempGreen, IMGLabelPaster::tempRed) {}
+IMGLabelPaster::IMGLabelPaster(const std::string& srcImgPath, const std::string& dstImgPath, const std::string& labelImgPath) :
+	_drawSelection(IMGLabelPaster::None), _terminalSignal(false), _windowName("LebelPaster"), 
+	_shapePainterPointer(nullptr), _srcImgPath(srcImgPath), _dstImgPath(dstImgPath),  _labelImgPath(labelImgPath),
+	_transColor(IMGLabelPaster::tempBlue, IMGLabelPaster::tempGreen, IMGLabelPaster::tempRed) {}
 
 // Reade image into _targetIMG. Return True if succeed, otherwise return false.
 bool IMGLabelPaster::_readIMG() {
-	this->_targetIMG = cv::imread(this->_imgPath);
+	std::cout << "loading... :" << this->_srcImgPath << std::endl;
+	std::cout << "loading... :" << this->_dstImgPath << std::endl;
+	this->_targetIMG = cv::imread(this->_srcImgPath);
 	this->_originalIMG = this->_targetIMG.clone();
+	this->_labelIMG = cv::imread(this->_labelImgPath);
+	
 	return !this->_targetIMG.empty();
 }
 
@@ -41,18 +47,13 @@ void IMGLabelPaster::start() {
 
 		// User Interaction Loop
 		while (!this->_terminalSignal) {
-			if (_shapePainterPointer != nullptr) {
-				//for (size_t i = 0; i < _shapePainterPointer->_imgsHistory.size(); i++) {
-				//	cv::imshow(std::to_string(i), _shapePainterPointer->_imgsHistory.at(i));
-				//}
-			}
-			
-			int key = cv::waitKey(30);
+		
+			int key = cv::waitKey(5);
 			
 			if (key == 'q') {
-				std::cout << "program is terminated" << std::endl;
-				// exit(-1); あんまり使わないほうがいい。
 				this->_terminalSignal = true;
+				std::cout << "b" << std::endl;
+
 			}
 			else if (key == 'z') {
 				_shapePainterPointer->Undo();
@@ -64,12 +65,25 @@ void IMGLabelPaster::start() {
 				this->_terminalSignal = true;
 			}
 		}
+		std::cout << "a" << std::endl;
+		cv::waitKey(0);
+		
+		//cv::destroyWindow(this->_windowName);
+		cv::destroyAllWindows();
+
+		std::cout << "b" << std::endl;
+		cv::waitKey(0);
+
+		std::cout << "program is terminated" << std::endl;
+
+		
 	}
 	else {
 		// Reading failed.
 		std::cout << "No image" << std::endl;
 	}
 }
+
 
 // Build function buttons.
 void IMGLabelPaster::_buildGUI() {
@@ -289,6 +303,9 @@ void IMGLabelPaster::_onMeanShiftButtonChanged(int state, void* userdata) {
 
 void IMGLabelPaster::_onSaveButtonChanged(int state, void* userdata) {
 	auto* imgLabelPasterPointer = static_cast<IMGLabelPaster*>(userdata);
+	/*if (imgLabelPasterPointer->_shapePainterPointer != nullptr) {
+		delete(imgLabelPasterPointer->_shapePainterPointer);
+	}*/
 	imgLabelPasterPointer->_maskImgSave();
 }
 
@@ -308,30 +325,32 @@ IMGLabelPaster::~IMGLabelPaster() {
 	}
 }
 
+bool file_exists(const std::string& str)
+{
+	std::ifstream fs(str);
+	return fs.is_open();
+}
+
+
 void IMGLabelPaster::_maskImgSave() {
 	cv::Mat ImgForSave = this->_originalIMG.clone();
 
-	std::vector<cv::Mat> drawed_channels, original_channels, output_channels;
+	for (int y = 0; y < this->_originalIMG.rows; y++) {
+		// ポインタの取得
+		cv::Vec3b* PtrTarget = this->_targetIMG.ptr<cv::Vec3b>(y);
+		cv::Vec3b* PtrOriginal = this->_originalIMG.ptr<cv::Vec3b>(y);
+		cv::Vec3b* PtrOutput = ImgForSave.ptr<cv::Vec3b>(y);
 
-	cv::split(this->_targetIMG, drawed_channels);
-	cv::split(this->_originalIMG, original_channels);
-	cv::split(ImgForSave, output_channels);
-
-	for (int channel = 0; channel < original_channels.size(); channel++) {
-		for (int y = 0; y < this->_originalIMG.rows; y++) {
-			unsigned char* PtrTarget   = drawed_channels  [channel].ptr<unsigned char>(y);
-			unsigned char* PtrOriginal = original_channels[channel].ptr<unsigned char>(y);
-			unsigned char* PtrOutput   = output_channels  [channel].ptr<unsigned char>(y);
-			for (int x = 0; x < this->_originalIMG.cols; x++) {
-				
-				if (PtrOriginal[x] == PtrTarget[x])		PtrOutput[x] = 0;
-				else									PtrOutput[x] = PtrTarget[x];
+		for (int x = 0; x < this->_originalIMG.cols; x++) {
+			if (PtrTarget[x] == PtrOriginal[x]) {
+				PtrOutput[x] = cv::Vec3b(0, 0, 0);
+			}
+			else {
+				PtrOutput[x] = PtrTarget[x];
 			}
 		}
 	}
-
-	cv::merge(output_channels, ImgForSave);
-
+	
 
 	cv::Mat ImgForSaveColor, ImgForSaveGray;
 
@@ -343,9 +362,26 @@ void IMGLabelPaster::_maskImgSave() {
 		ImgForSaveColor = ImgForSave.clone();
 		cv::cvtColor(ImgForSave, ImgForSaveGray, cv::COLOR_BGR2GRAY);
 	}
-	cv::imwrite("A_BrushGrowCancerGray.png", ImgForSaveGray);
-	cv::imwrite("A_BrushGrowCancerColor.png", ImgForSaveColor);
 
-	std::cout << "Save Mask Image." << std::endl;
+	const std::string window_name = "Mask Image";
+	
+	/*
+	std::string filename;
+	int i = 0; 
+	cv::imshow(window_name, ImgForSaveColor);
+	cv::moveWindow(window_name, 0, 0);
+
+	do {
+		filename = this->_dstImgPath + std::to_string(i) + ".png";
+		std::cout << "name : " << filename << std::endl;
+		i++;
+	} while (file_exists(filename));
+	*/
+	cv::imwrite(this->_dstImgPath, ImgForSaveColor);
+
+	std::cout << "saved mask image" << std::endl;
+	std::cout << "name : " << this->_dstImgPath << std::endl;
+	std::cout << "if you want to quit, press q" << std::endl;
 }
+
 

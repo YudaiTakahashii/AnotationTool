@@ -11,7 +11,7 @@
 class ShapePainter {
 public:
 	explicit ShapePainter(cv::Mat& targetIMG, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory, 
-		std::string windowName, cv::Scalar lineColor, cv::Scalar_<int>& transparencyColor, int thickness);
+		std::string windowName ,cv::Scalar lineColor, cv::Scalar_<int>& transparencyColor, int thickness);
 	virtual void mouseCallBack(int event, int x, int y, int flags) = 0;
 
 	const cv::Point2d& getPoint() const;
@@ -37,6 +37,7 @@ protected:
 	cv::Mat& _originalIMG;
 	cv::Mat _targetIMG;
 	std::string _windowName;
+	const std::string _trackbarName = "Parameter";
 	cv::Point2d _clickPoint;
 	bool _isLClicking;
 	cv::Scalar _lineColor;

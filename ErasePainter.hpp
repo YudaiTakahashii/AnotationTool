@@ -8,7 +8,8 @@ class ErasePainter : public ShapePainter {
 public:
 
 	ErasePainter(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory, 
-		const std::string& windowName, const cv::Scalar& lineColor, int thickness,
+		const std::string& windowName,
+		const cv::Scalar& lineColor, int thickness,
 		cv::Scalar_<int>& transparencyColor);
 
 	~ErasePainter();
@@ -19,7 +20,6 @@ public:
 	void ReplacePixcelValue2OriginalForColor();
 private:
 	int _radius = 5;
-	std::string _trackbarWindowName;
 	Mat _tempTargetIMG;
 	bool _isRGB;
 	unsigned char _markerForErasing;

@@ -3,14 +3,17 @@
 ErasePainter::ErasePainter(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory,
 	const std::string& windowName, const cv::Scalar& lineColor,
 	int thickness, cv::Scalar_<int>& transparencyColor) :
-	ShapePainter(targetImg, originalIMG,imgsHistory, windowName, lineColor, transparencyColor, thickness), _trackbarWindowName("EraseTrackbar") {
-
+	ShapePainter(targetImg, originalIMG,imgsHistory, windowName, lineColor, transparencyColor, thickness)
+{
+	// 前のトラックバーがあれば削除
+	if (cv::getWindowProperty(this->_trackbarName, WND_PROP_VISIBLE) != -1)
+		destroyWindow(this->_trackbarName);
 
 	// 線の太さを表すトラックバーを作成する
-	cv::namedWindow(this->_trackbarWindowName);
-	cv::resizeWindow(this->_trackbarWindowName, 100, 0);
-	cv::moveWindow(this->_trackbarWindowName, 300, 300);
-	cv::createTrackbar("Line thickness", this->_trackbarWindowName, &this->_radius, 15, nullptr);
+	cv::namedWindow(this->_trackbarName);
+	cv::resizeWindow(this->_trackbarName, 100, 0);
+	cv::moveWindow(this->_trackbarName, 300, 300);
+	cv::createTrackbar("Line thickness", this->_trackbarName, &this->_radius, 15, nullptr);
 
 	//画像がグレースケールで入ってきているときは，BGRに変換
 	if (this->_targetIMG.type() == 0) {
@@ -44,7 +47,6 @@ ErasePainter::ErasePainter(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector
 }
 
 ErasePainter::~ErasePainter() {
-	cv::destroyWindow(this->_trackbarWindowName);
 }
 
 void ErasePainter::mouseCallBack(int event, int x, int y, int flags) {

@@ -5,8 +5,8 @@
 
 ShapePainter::ShapePainter(cv::Mat& targetIMG, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory, 
 	std::string windowName, cv::Scalar lineColor, cv::Scalar_<int>& transparencyColor, int thickness) :
-	_targetIMG(targetIMG), _windowName(std::move(windowName)), _clickPoint(-1, -1), _isLClicking(false),
-	_originalIMG(originalIMG), _imgsHistory(imgsHistory),
+	_targetIMG(targetIMG), _windowName(std::move(windowName)), 
+	_clickPoint(-1, -1), _isLClicking(false),_originalIMG(originalIMG), _imgsHistory(imgsHistory),
 	_lineColor(std::move(lineColor)), _transparencyColor(transparencyColor), _thickness(thickness) {
 }
 

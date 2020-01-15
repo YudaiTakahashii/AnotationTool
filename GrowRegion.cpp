@@ -3,14 +3,18 @@
 
 GrowRegion::GrowRegion(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory,
 	const std::string& windowName, const cv::Scalar& lineColor,
-	int thickness, cv::Scalar_<int>& transparencyColor) : _parameterWindowName("parameter"),
+	int thickness, cv::Scalar_<int>& transparencyColor) : 
 	ShapePainter(targetImg, originalIMG, imgsHistory, windowName, lineColor, transparencyColor, thickness) {
 
+	// 前のトラックバーがあれば削除
+	if (cv::getWindowProperty(this->_trackbarName, WND_PROP_VISIBLE) != -1)
+		destroyWindow(this->_trackbarName);
+
 	//トラックバーの生成
-	cv::namedWindow(this->_parameterWindowName);
-	cv::resizeWindow(this->_parameterWindowName, 100, 0);
-	cv::moveWindow(this->_parameterWindowName, 300, 300);
-	cv::createTrackbar("parameter", this->_parameterWindowName, &this->_parameter, this->_MAX_PARAMETER, nullptr);
+	cv::namedWindow(this->_trackbarName);
+	cv::resizeWindow(this->_trackbarName, 100, 0);
+	cv::moveWindow(this->_trackbarName, 300, 300);
+	cv::createTrackbar("parameter", this->_trackbarName, &this->_parameter, this->_MAX_PARAMETER, nullptr);
 
 	//pixcel単位でのアクセスをするので, ScalarをRGBの要素ごとに保存する
 	this->_transparencyBlue = this->_transparencyColor[0];
@@ -20,7 +24,6 @@ GrowRegion::GrowRegion(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv:
 
 	//グレースケールに変換した画像を保存
 	if (this->_targetIMG.type() != 0) {
-		std::cout << 1 << std::endl;
 		cvtColor(this->_targetIMG, this->_grayIMG, cv::COLOR_RGB2GRAY);
 		this->_isRGB = true;
 	}
@@ -37,7 +40,6 @@ GrowRegion::GrowRegion(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv:
 }
 
 GrowRegion::~GrowRegion() {
-	cv::destroyWindow(this->_parameterWindowName);
 	std::cout << "~GrowRegion" << std::endl;
 
 }
