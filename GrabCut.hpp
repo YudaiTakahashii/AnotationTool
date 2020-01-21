@@ -11,7 +11,7 @@ public:
 		cv::Scalar_<int>& transparencyColor);
 	~GrabCut();
 	void mouseCallBack(int event, int x, int y, int flags) override;
-	cv::Mat ExcuteGrabCut(cv::Rect2d rectangle);
+	void ExcuteGrabCut(cv::Rect2d rectangle);
 
 private:
 	const int _MAX_PARAMETER = 50;

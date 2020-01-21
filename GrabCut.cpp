@@ -9,11 +9,7 @@ GrabCut::GrabCut(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>&
 	if (cv::getWindowProperty(this->_trackbarName, WND_PROP_VISIBLE) != -1)
 		destroyWindow(this->_trackbarName);
 
-	//トラックバーの生成
-	cv::namedWindow(this->_trackbarName);
-	cv::resizeWindow(this->_trackbarName, 100, 0);
-	cv::moveWindow(this->_trackbarName, 300, 300);
-	cv::createTrackbar("parameter", this->_trackbarName, &this->_parameter, this->_MAX_PARAMETER, nullptr);
+	
 }
 
 void GrabCut::mouseCallBack(int event, int x, int y, int flags) {
@@ -35,6 +31,7 @@ void GrabCut::mouseCallBack(int event, int x, int y, int flags) {
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, tempTargetIMG);
 			cv::rectangle(tempTargetIMG, rect, this->_lineColor, this->_thickness);
 			cv::imshow(this->_windowName, tempTargetIMG);
+			cv::moveWindow(this->_windowName, 300, 300);
 		}
 
 	}
@@ -46,26 +43,29 @@ void GrabCut::mouseCallBack(int event, int x, int y, int flags) {
 			rectPoints.emplace_back(x, this->_clickPoint.y);
 			rectPoints.emplace_back(x, y);
 			rectPoints.emplace_back(this->_clickPoint.x, y);
-			cv::Mat SegmentedImage = ExcuteGrabCut(cv::Rect2d(this->_clickPoint, cv::Point2d(x, y)));
-			SegmentedImage.copyTo(this->_targetIMG, SegmentedImage);
-			cv::namedWindow("target Image");
-			cv::imshow("target Image", this->_targetIMG);
+			ExcuteGrabCut(cv::Rect2d(this->_clickPoint, cv::Point2d(x, y)));
+
 
 			cv::Mat ImgForShow = this->_originalIMG.clone();
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, ImgForShow);
 			cv::imshow(this->_windowName, ImgForShow);
+			cv::moveWindow(this->_windowName, 300, 300);
+
 			this->_imgsHistory.push_back(this->_targetIMG.clone());
 			
 		}
 	}
 }
 
-cv::Mat GrabCut::ExcuteGrabCut(cv::Rect2d rectangle)
+void GrabCut::ExcuteGrabCut(cv::Rect2d rectangle)
 {
 	cv::Mat result; // segmentation result (4 possible values)
 	cv::Mat bgModel, fgModel; // 背景GMMモデルと前景GMMモデル
 
-	cv::grabCut(this->_originalIMG,    // input image
+	if (rectangle.x == 0 || rectangle.y == 0) {
+		std::cout << "領域が小さすぎます" << std::endl;
+	}
+	cv::grabCut(this->_targetIMG,    // input image
 		result,   // segmentation result
 		rectangle,// rectangle containing foreground 
 		bgModel, fgModel, // models
@@ -80,18 +80,11 @@ cv::Mat GrabCut::ExcuteGrabCut(cv::Rect2d rectangle)
 	cv::Mat foreground(this->_originalIMG.size(), CV_8UC3, cv::Scalar(0, 0, 0));
 	cv::Mat MaskImage(this->_originalIMG.size(), CV_8UC3, this->_transparencyColor);
 	// resultが非ゼロの部分のみを，imageからforegroundにコピー
-	MaskImage.copyTo(foreground, result); // bg pixels not copied(
+	MaskImage.copyTo(this->_targetIMG, result); // bg pixels not copied(
 
 									  // draw rectangle on original image
-	// display result
-	cv::namedWindow("Segmented Image");
-	cv::imshow("Segmented Image", foreground);
-
-	return foreground;
-
 
 }
 GrabCut::~GrabCut() {
 	std::cout << "~GrabCut" << std::endl;
-
 }

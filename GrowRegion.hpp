@@ -12,20 +12,20 @@ private:
 	int _marker_size;
 	std::vector<bool> _marker;
 	bool _isRGB;
-
-	Mat _grayIMG;
-	Mat _tempIMG;
-
+	cv::Mat _grayIMG;
+	cv::Vec3b _seedValue;
 	int _transparencyBlue, _transparencyGreen, _transparencyRed;
+	int _morphorogyNum = 6;
 public:
 	GrowRegion(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector<cv::Mat>& imgsHistory, 
 		const std::string& windowName,
 		const cv::Scalar& lineColor, int thickness,
 		cv::Scalar_<int>& transparencyColor);
 	~GrowRegion();
-	void GrowRegionInternal(unsigned char seed_val);
+	void GrowRegionInternal(cv::Vec3b seed_val);
 	void ReplacePixcelValueByRegionGrowing();
 	void mouseCallBack(int event, int x, int y, int flags) override;
+	bool isSameArea(int x, int y);
 };
 
 

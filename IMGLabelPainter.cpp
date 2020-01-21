@@ -11,13 +11,16 @@
 #include "ErasePainter.hpp"
 #include "GrowRegion.hpp"
 #include "GrabCut.hpp"
+#include "Empty.hpp"
 #include "MeanShitFilter.hpp"
 
 
+
 //cv::Scalar_<int> IMGLabelPaster::_transColor = cv::Scalar_<int>(100, 100, 150);
-int IMGLabelPaster::tempBlue = 100;
-int IMGLabelPaster::tempGreen = 100;
-int IMGLabelPaster::tempRed = 100;
+int IMGLabelPaster::tempBlue = 0;
+int IMGLabelPaster::tempGreen = 255;
+int IMGLabelPaster::tempRed = 255;
+
 IMGLabelPaster::IMGLabelPaster(const std::string& srcImgPath, const std::string& dstImgPath, const std::string& labelImgPath) :
 	_drawSelection(IMGLabelPaster::None), _terminalSignal(false), _windowName("LebelPaster"), 
 	_shapePainterPointer(nullptr), _srcImgPath(srcImgPath), _dstImgPath(dstImgPath),  _labelImgPath(labelImgPath),
@@ -40,6 +43,8 @@ void IMGLabelPaster::start() {
 		// if reading succeed, process to construct GUI.
 		cv::namedWindow(this->_windowName);
 		cv::imshow(this->_windowName, this->_targetIMG);
+		cv::moveWindow(this->_windowName, 300, 300);
+
 		// Build function buttons.
 		this->_buildGUI();
 		// Configure mouse callback method
@@ -52,8 +57,6 @@ void IMGLabelPaster::start() {
 			
 			if (key == 'q') {
 				this->_terminalSignal = true;
-				std::cout << "b" << std::endl;
-
 			}
 			else if (key == 'z') {
 				_shapePainterPointer->Undo();
@@ -65,15 +68,8 @@ void IMGLabelPaster::start() {
 				this->_terminalSignal = true;
 			}
 		}
-		std::cout << "a" << std::endl;
-		cv::waitKey(0);
-		
-		//cv::destroyWindow(this->_windowName);
+		std::cout << 1 << std::endl;
 		cv::destroyAllWindows();
-
-		std::cout << "b" << std::endl;
-		cv::waitKey(0);
-
 		std::cout << "program is terminated" << std::endl;
 
 		
@@ -245,7 +241,6 @@ void IMGLabelPaster::_onRegionGrowingButtonChanged(int state, void* userdata) {
 
 	auto* imgLabelPasterPointer = static_cast<IMGLabelPaster*>(userdata);
 
-
 	if (state == 1) {
 		// if the "Eraser" radio Button is on, change the status of _drawSelection
 		imgLabelPasterPointer->_drawSelection = IMGLabelPaster::Region_Growing;
@@ -303,9 +298,20 @@ void IMGLabelPaster::_onMeanShiftButtonChanged(int state, void* userdata) {
 
 void IMGLabelPaster::_onSaveButtonChanged(int state, void* userdata) {
 	auto* imgLabelPasterPointer = static_cast<IMGLabelPaster*>(userdata);
-	/*if (imgLabelPasterPointer->_shapePainterPointer != nullptr) {
-		delete(imgLabelPasterPointer->_shapePainterPointer);
-	}*/
+	if (state == 1) {
+		// if the "GrabCut" radio Button is on, change the status of _drawSelection
+		imgLabelPasterPointer->_drawSelection = IMGLabelPaster::None;
+		if (imgLabelPasterPointer->_shapePainterPointer != nullptr) {
+			delete(imgLabelPasterPointer->_shapePainterPointer);
+		}
+		// let the _shapePanterPointer point to a new GrabCut
+		imgLabelPasterPointer->_shapePainterPointer = new Empty(
+			imgLabelPasterPointer->_targetIMG, imgLabelPasterPointer->_originalIMG,
+			imgLabelPasterPointer->_imgs_history,
+			imgLabelPasterPointer->_windowName,
+			cv::Scalar(255, 0, 0), 3,
+			imgLabelPasterPointer->_transColor);
+	}
 	imgLabelPasterPointer->_maskImgSave();
 }
 
@@ -365,23 +371,11 @@ void IMGLabelPaster::_maskImgSave() {
 
 	const std::string window_name = "Mask Image";
 	
-	/*
-	std::string filename;
-	int i = 0; 
-	cv::imshow(window_name, ImgForSaveColor);
-	cv::moveWindow(window_name, 0, 0);
-
-	do {
-		filename = this->_dstImgPath + std::to_string(i) + ".png";
-		std::cout << "name : " << filename << std::endl;
-		i++;
-	} while (file_exists(filename));
-	*/
+	
 	cv::imwrite(this->_dstImgPath, ImgForSaveColor);
-
 	std::cout << "saved mask image" << std::endl;
 	std::cout << "name : " << this->_dstImgPath << std::endl;
-	std::cout << "if you want to quit, press q" << std::endl;
+	this->_terminalSignal = true;
 }
 
 

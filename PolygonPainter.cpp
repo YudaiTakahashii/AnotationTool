@@ -22,6 +22,8 @@ void PolygonPainter::mouseCallBack(int event, int x, int y, int flags) {
 		cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, tempTargetIMG);
 		polylines(tempTargetIMG, this->_points, false, this->_lineColor, this->_thickness);
 		cv::imshow(this->_windowName, tempTargetIMG);
+		cv::moveWindow(this->_windowName, 300, 300);
+
 		
 	}
 	else if (event == cv::EVENT_MBUTTONDOWN) {
@@ -30,6 +32,8 @@ void PolygonPainter::mouseCallBack(int event, int x, int y, int flags) {
 			cv::Mat ImgForShow = this->_originalIMG.clone();
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, ImgForShow);
 			cv::imshow(this->_windowName, ImgForShow);
+			cv::moveWindow(this->_windowName, 300, 300);
+
 			this->_imgsHistory.push_back(this->_targetIMG.clone());
 			this->_points.clear();
 		}

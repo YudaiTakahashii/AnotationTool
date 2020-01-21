@@ -12,7 +12,7 @@ MeanShitFilter::MeanShitFilter(cv::Mat& targetImg, cv::Mat& originalIMG, std::ve
 	//トラックバーの生成
 	cv::namedWindow(this->_trackbarName);
 	cv::resizeWindow(this->_trackbarName, 100, 0);
-	cv::moveWindow(this->_trackbarName, 300, 300);
+	cv::moveWindow(this->_trackbarName, 0, 0);
 	cv::createTrackbar("Space Window", this->_trackbarName, &this->_spaceWindowSize, this->_MAX_PARAMETER, nullptr);
 	cv::createTrackbar("Color Window", this->_trackbarName, &this->_colorWindowSize, this->_MAX_PARAMETER, nullptr);
 }
@@ -31,11 +31,9 @@ void MeanShitFilter::mouseCallBack(int event, int x, int y, int flags) {
 
 
 		cv::imshow(this->_windowName, this->_targetIMG);
-		this->_imgsHistory.push_back(this->_targetIMG.clone());
+		cv::moveWindow(this->_windowName, 300, 300);
 
-		for (int i = 0; i < this->_imgsHistory.size();  i++) {
-			cv::imshow(std::to_string(i), this->_imgsHistory[i]);
-		}
+		this->_imgsHistory.push_back(this->_targetIMG.clone());
 	}
 }
 
@@ -46,5 +44,4 @@ void MeanShitFilter::ExcuteMeanShitFilter(cv::Mat image)
 
 	cv::pyrMeanShiftFiltering(src_img, image, this->_spaceWindowSize, this->_colorWindowSize, level,
 		 TermCriteria(TermCriteria::MAX_ITER+TermCriteria::EPS, 5, 1));
-
 }

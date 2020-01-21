@@ -12,9 +12,9 @@ BrushPainter::BrushPainter(cv::Mat& targetImg, cv::Mat& originalIMG, std::vector
 
 	cv::namedWindow(this->_trackbarName);
 	cv::resizeWindow(this->_trackbarName, 100, 0);
-	cv::moveWindow(this->_trackbarName, 300, 300);
+	cv::moveWindow(this->_trackbarName, 0, 0);
 	
-	cv::createTrackbar("Line thickness", this->_trackbarName, &this->_radius, 15, nullptr);
+	cv::createTrackbar("Line thickness", this->_trackbarName, &this->_radius, 50, nullptr);
 
 }
 
@@ -46,6 +46,7 @@ void BrushPainter::mouseCallBack(int event, int x, int y, int flags) {
 			cv::Mat ImgForShow = this->_originalIMG.clone();
 			cv::addWeighted(this->_originalIMG, 0.3, this->_targetIMG, 0.7, 0, ImgForShow);
 			cv::imshow(this->_windowName, ImgForShow);
+			cv::moveWindow(this->_windowName, 300, 300);
 			
 
 			this->_clickPoint = Point2d(x, y);
